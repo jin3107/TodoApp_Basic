@@ -10,12 +10,14 @@ using Todo.Services.Interfaces;
 namespace Todo.Services.Jobs
 {
     [DisallowConcurrentExecution]
-    public class DailyTaskReportJob : IJob
+    public class WeeklyTaskSummaryJob : IJob
     {
         private readonly IEmailService _emailService;
-        private readonly ILogger<DailyTaskReportJob> _logger;
+        private readonly ILogger<WeeklyTaskSummaryJob> _logger;
 
-        public DailyTaskReportJob(IEmailService emailService, ILogger<DailyTaskReportJob> logger)
+        public WeeklyTaskSummaryJob(
+            IEmailService emailService,
+            ILogger<WeeklyTaskSummaryJob> logger)
         {
             _emailService = emailService;
             _logger = logger;
@@ -24,14 +26,18 @@ namespace Todo.Services.Jobs
         public async Task Execute(IJobExecutionContext context)
         {
             var jobKey = context.JobDetail.Key;
-            _logger.LogInformation("Starting Daily Task Report Job: {JobKey} at {Time}", jobKey, DateTime.Now);
+            _logger.LogInformation("Starting Weekly Task Summary Job: {JobKey} at {Time}",
+                jobKey, DateTime.Now);
+
             try
             {
-                await _emailService.SendDailyTaskReportAsync();
-                _logger.LogInformation("Daily Task Report Job completed successfilly");
-            } catch (Exception ex)
+                await _emailService.SendWeeklyTaskSummaryAsync();
+
+                _logger.LogInformation("Weekly Task Summary Job completed successfully!");
+            }
+            catch (Exception ex)
             {
-                _logger.LogError(ex, "Daily Task Report Job failed");
+                _logger.LogError(ex, "Weekly Task Summary Job failed!");
                 throw new JobExecutionException(ex, refireImmediately: false);
             }
         }
